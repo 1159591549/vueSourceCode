@@ -1,5 +1,5 @@
 
-import { initState } from './initState'
+import { initState } from './state'
 // 就是给Vue增加init方法的
 export function initMixin(Vue) {
     // 用于初始化操作
