@@ -6,6 +6,7 @@ export function initState(vm) {
         initData(vm)
     }
 }
+// 使用闭包，内部函数使用外部函数的参数
 function proxy(vm, target, key){
     Object.defineProperty(vm, key, {
         get(){
@@ -24,7 +25,6 @@ function initData(vm) {
     vm._data = data
     // 对数据进行劫持 vue2 里面采用了一个api defineProperty
     observe(data)
-
     // 这个时候取值是vm._data.name很麻烦，将vm._data用vm来代理就可以了
     for (const key in data) {
         proxy(vm, '_data', key)
