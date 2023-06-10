@@ -2,12 +2,11 @@ import { newArrayProto } from './array.js'
 class Observer {
     constructor(data) {
         // Object.defineProperty只能劫持已经存在的属性 后增的 删除的无法劫持(vue里面因此存着这样的bug, 因此专门写了一些api $set和$delete来监测数据)
-        // 给数据加了一个标识 如果数据上有__ob__则说明这个属性被监测过
+        // 给数据加了一个标识 如果数据上有__ob__则说明这个属性被监测过，且添加可比便利属性为enumerable: false 防止便利死循环的出现
         Object.defineProperty(data, '__ob__', {
             value: this,
             enumerable: false
         })
-        // data.__ob__ = this 
         if (Array.isArray(data)) {
             // 这里我们可以重写数组中的 7个变异方法 是可以修改数组本身的
             // 需要保留数组原有的特性 并且可以重写部分方法
