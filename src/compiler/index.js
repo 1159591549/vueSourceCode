@@ -6,7 +6,7 @@ const startTagopen = new RegExp(`^<${qnameCapture}`);
 const endTag = new RegExp(`^<\\/${qnameCapture}[^>]*>`);
 // 第一个分组就是属性 key value 就是分组3/分组4/分组5
 const attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/; // 匹配属性
-const startTagClose = /^\s*(\/?)>/; //<div> <br />
+const startTagClose = /^\s*(\/?)>/; // <div> <br />
 const defaultTagRE = /\{\{((?:.|\r?\n)+?)\}\}/g // {{ fss }} 匹配到的内容就是我们表达式的变量
 // vue3采用的不是使用正则
 // 采用解析一个删除一个的原则 以模板彻底结束为止 
@@ -68,7 +68,7 @@ function parseHTML(html) {
             }
             advance(start[0].length)
             let attr, end;
-            // 如果不是开始标签的结束 就一直匹配下去 并且
+            // 如果不是开始标签的结束 就一直匹配下去
             while (!(end = html.match(startTagClose)) && (attr = html.match(attribute))) {
                 advance(attr[0].length)
                 match.attrs.push({
@@ -84,33 +84,32 @@ function parseHTML(html) {
         return false // 不是开始标签
     }
     while (html) {
-        // 如果textEnd 为0 说明是一个开始标签或者结束标签
+        // 如果textEnd为0 说明是一个开始标签或者结束标签
         // 如果textEnd > 0说明就是文本的结束位置
-        let textEnd = html.indexOf('<')// 如果indexOf中的索引是0 则说明是个标签
+        let textEnd = html.indexOf('<') // 如果indexOf中的索引是0 则说明是个标签
         if (textEnd === 0) {
             // 开始标签匹配结果 
             const startTagMatch = parseStartTag();
-            if (startTagMatch) { //解析到的开始标签
+            if (startTagMatch) { // 解析到的开始标签
                 start(startTagMatch.tagName, startTagMatch.attrs)
                 continue
             }
             let endTagMatch = html.match(endTag)
             if (endTagMatch) {
                 advance(endTagMatch[0].length)
-                end(endTagMatch[1])
+                end()
                 continue
             }
         }
         if (textEnd > 0) {
             // 文本内容
-            let text = html.substring(0, textEnd);//解析到的文本标签
+            let text = html.substring(0, textEnd);// 解析到的文本标签
             if (text) {
                 chars(text)
                 advance(text.length)
             }
         }
     }
-    console.log(root);
 }
 // 对模板进行编译处理
 export function compileToFunction(template) {
