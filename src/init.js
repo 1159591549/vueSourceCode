@@ -26,16 +26,15 @@ export function initMixin(Vue) {
             // 没有render看有没有template，没有template采用外部的template
             if (!ops.template && el) {
                 template = el.outerHTML
-
             } else {
-                // 如果有el 啧采用模板的内容
+                // 如果有el 则采用模板的内容
                 if (el) {
                     template = ops.template
                 }
             }
             // 写了template 就用写了的template
             if (template) {
-                // 这里需要对魔板进行编译
+                // 这里需要对模板进行编译
                 const render = compileToFunction(template);
                 // jsx 最终挥别编译成h('xxx')
                 ops.render = render
