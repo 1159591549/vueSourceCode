@@ -65,11 +65,10 @@ export function compileToFunction(template) {
     // 2、生成render方法(render方法执行后的返回结果就是虚拟dom)
     // 模板引擎的实现原理 就是 with + new Function()
     let code = codelgen(ast)
-    console.log(code);
-    // code = `with(this){return ${code}})`
-    // // 根据代码生成render函数
-    // let render = new Function(code)
-    // return render
+    code = `with(this){return ${code}}`
+    // 根据代码生成render函数
+    let render = new Function(code)
+    return render
     // ast属性组装成 标签名 属性 儿子
     // render(){
     //     return _c('div', { id: 'app' },
