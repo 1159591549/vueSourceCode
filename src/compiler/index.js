@@ -24,8 +24,8 @@ function gen(node) {
     } else {
         // 如果是文本 纯文本和差值表达式情况 
         let text = node.text
-        if (!defaultTagRE.test(text)) { //纯文本
-            return `_v('${JSON.stringify(text)}')`
+        if (!defaultTagRE.test(text)) { // 纯文本
+            return `_v(${JSON.stringify(text)})`
         } else { // 差值表达式
             // _v(_s(name) + 'hello' + _s(name)))
             let tokens = []
@@ -34,7 +34,7 @@ function gen(node) {
             defaultTagRE.lastIndex = 0
             let lastIndex = 0
             while (match = defaultTagRE.exec(text)) {
-                let index = match.index // 匹配的位置
+                let index = match.index // 匹配的开始位置
                 if (index > lastIndex) {
                     tokens.push(JSON.stringify(text.slice(lastIndex, index)))
                 }
