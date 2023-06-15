@@ -1,4 +1,5 @@
 import { createElementVNode, createTextVNode } from './vdom'
+import Watcher from './observe/watcher'
 function createElm(vnode){
     let {tag, data, children, text}  = vnode
     if (typeof tag === 'string') {
@@ -33,6 +34,7 @@ function patch(oldVNode, vnode){
         let newElm = createElm(vnode)
         parentElm.insertBefore(newElm, elm.nextSibling)
         parentElm.removeChild(elm)
+        return newElm
     }else{
         // diff算法
     }
@@ -44,7 +46,7 @@ export function initLifeCylce(Vue){
         const vm = this
         const el = vm.$el
         // patch既有初始化功能也有更新功能
-        patch(el, vnode)
+        vm.$el = patch(el, vnode)
     }
     // _c('div', {}, ...children)
     Vue.prototype._c = function(){
@@ -72,10 +74,14 @@ export function initLifeCylce(Vue){
 
 export function mountComponent(vm, el){
     vm.$el = el
-    // 调用render方法产生虚拟节点 虚拟dom
-    vm._update(vm._render())  //vm.$options.render()
-
-}
+    // 1、调用render方法产生虚拟节点 虚拟dom
+    const updateComponent = () => {
+        vm._update(vm._render())  //vm.$options.render()
+    }
+    new Watcher(vm, updateComponent, true)
+    // 2、根据虚拟dom产生真实dom
+    // 3、插入到el元素中
+} 
 // vue 核心流程 
 // 1、创造响应式数据
 // 2、模板转换成ast语法树

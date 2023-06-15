@@ -1,4 +1,5 @@
 import { newArrayProto } from './array.js'
+import Dep from './dep.js'
 class Observer {
     constructor(data) {
         // Object.defineProperty只能劫持已经存在的属性 后增的 删除的无法劫持(vue里面因此存着这样的bug, 因此专门写了一些api $set和$delete来监测数据)
@@ -25,15 +26,19 @@ class Observer {
     // 观测数组
     observeArray(data) {
         data.forEach(item => observe(item))
-    }
+    } 
 }
 // 闭包 属性劫持
 export function defineReactive(target, key, value) {
     // 属性引用类型时候，进行递归劫持
     observe(value)
+    let dep = new Dep() //每一个属性都有一个dep
     Object.defineProperty(target, key, {
         // 取值的时候会执行get
         get() {
+            if (Dep.target) {
+                dep.depend() // 让这属性的收集器记住这个watcher
+            }
             return value
         },
         // 修改的时候 会执行set
@@ -42,6 +47,7 @@ export function defineReactive(target, key, value) {
             // data.address = {name: 'hzy'} 设置的值时对象的时候要进行再次代理
             observe(newValue)
             value = newValue
+            dep.notify() //通知更新
         }
     })
 }
