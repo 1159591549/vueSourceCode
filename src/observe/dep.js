@@ -8,7 +8,7 @@ class Dep{
     depend(){
         // 这里我们不希望放重复的watcher 而且刚才只是一个单向的关系 dep -> watcher
         // this.subs.push(Dep.target)
-        Dep.target.addDep(this) //让watcher记住dep
+        Dep.target.addDep(this) // 让watcher记住dep
     }
     addSub(watcher){
         this.subs.push(watcher)
