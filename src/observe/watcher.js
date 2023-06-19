@@ -42,8 +42,9 @@ let queue = []
 let has = {}
 let pending = false
 function flushSchedulerQueue() {
+    // 拷贝一份数组
     let flushQueue = queue.slice(0)
-    queue = [] 
+    queue = []
     has = {}
     pending = false
     flushQueue.forEach(q => q.run()) // 在刷新的过程中可能还有新的watcher 重新放到queue
@@ -55,14 +56,57 @@ function queueWatcher(watcher) {
         has[id] = true
         // 不管我们的update执行多少次 最终只执行一次刷新操作
         if (!pending) {
-            setTimeout(flushSchedulerQueue, 0)
+            nextTick(flushSchedulerQueue, 0)
             pending = true
         }
     }
 }
+let callbacks = []
+let waiting = false
+function flushCallbacks() {
+    let cbs = callbacks.slice(0)
+    waiting = false
+    callbacks = []
+    // 按照任务依次执行
+    cbs.forEach(cb => cb())
+}
+// nextTick中没有直接使用某个setTimeout api 而是采用了优雅降级的方式timerFunc
+// 内部先采用的是promise（ie不兼容）MutationObserver（h5的api） 可以考虑IE专项的setImmediate setTimeout
+let timerFunc;
+if (Promise) {
+    timerFunc = () => {
+        Promise.resolve().then(flushCallbacks)
+    }
+} else if (MutationObserver) {
+    // 这里传入的回调是异步执行的
+    let observer = new MutationObserver(flushCallbacks)
+    // 创建文本节点1
+    let textNode = document.createTextNode(1)
+    // 监控文本节点的数据
+    observer.observe(textNode, {
+        characterData: true
+    })
+    // 文本变化之后会重新执行监测函数 flushCallbacks实现数据更新
+    timerFunc = () => {
+        textNode.textContent = 2
+    }
+}else if (setImmediate) {
+    timerFunc = () => {
+        setImmediate(flushCallbacks)
+    }
+}else{
+    timerFunc = () => {
+        setTimeout(flushCallbacks)
+    }
+}
 
-export function nextTick(cb){
-
+export function nextTick(cb) {
+    // 维护nextTick中的callback方法 最后刷新
+    callbacks.push(cb)
+    if (!waiting) {
+        timerFunc(flushCallbacks)
+        waiting = true
+    }
 }
 // 需要给每个属性增加一个dep 目的就是收集watcher
 // 一个组件中有多少个属性 (n个属性会对应一个组件) n个dep对应一个watcher

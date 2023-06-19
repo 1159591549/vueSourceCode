@@ -37,7 +37,8 @@ export function initMixin(Vue) {
             if (template) {
                 // 这里需要对模板进行编译
                 const render = compileToFunction(template);
-                // jsx 最终挥别编译成h('xxx')
+                console.log(render, "----------render----------");
+                // jsx 最终会被编译成h('xxx')
                 ops.render = render
             }
         }
