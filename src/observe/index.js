@@ -2,6 +2,8 @@ import { newArrayProto } from './array.js'
 import Dep from './dep.js'
 class Observer {
     constructor(data) {
+        // 给每个属性添加收集器
+        this.dep = new Dep()
         // Object.defineProperty只能劫持已经存在的属性 后增的 删除的无法劫持(vue里面因此存着这样的bug, 因此专门写了一些api $set和$delete来监测数据)
         // 给数据加了一个标识 如果数据上有__ob__则说明这个属性被监测过，且添加可比便利属性为enumerable: false 防止便利死循环的出现
         Object.defineProperty(data, '__ob__', {
@@ -28,16 +30,32 @@ class Observer {
         data.forEach(item => observe(item))
     } 
 }
+// 深层次嵌套会递归 递归多了性能差 不存在的属性监测不到 存在的属性要重写方法
+function dependArray(value){
+    for (let i = 0; i < value.length; i++) {
+        let current = value[i]
+        current.__ob__ && current.__ob__.dep.depend()
+        if (Array.isArray(current)) {
+            dependArray(current)
+        }
+    }
+}
 // 闭包 属性劫持
 export function defineReactive(target, key, value) {
     // 属性引用类型时候，进行递归劫持
-    observe(value)
+    let childOb = observe(value)
     let dep = new Dep() //每一个属性都有一个dep
     Object.defineProperty(target, key, {
         // 取值的时候会执行get
         get() {
             if (Dep.target) {
                 dep.depend() // 让这属性的收集器记住这个watcher
+                if (childOb) {
+                    childOb.dep.depend()
+                    if (Array.isArray(value)) {
+                        dependArray(value)
+                    }
+                }
             }
             return value
         },

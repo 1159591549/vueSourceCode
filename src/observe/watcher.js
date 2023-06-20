@@ -104,7 +104,7 @@ export function nextTick(cb) {
     // 维护nextTick中的callback方法 最后刷新
     callbacks.push(cb)
     if (!waiting) {
-        timerFunc(flushCallbacks)
+        timerFunc()
         waiting = true
     }
 }
