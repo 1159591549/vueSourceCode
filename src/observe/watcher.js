@@ -1,4 +1,5 @@
 import Dep from './dep'
+import { pushTarget, popTarget } from './dep'
 let id = 0
 // 当我们创建渲染watcher时候 我们会把当前渲染的watcher放到Dep.target上
 // 调用_render() 会取值走到get上
@@ -13,7 +14,10 @@ class Watcher {
         this.getter = fn // 意味着调用这个函数可以发生取值操作
         this.deps = [] // 后续我们实现计算属性和清理功能做需要用到
         this.desId = new Set()
-        this.get()
+        this.lazy = options.lazy
+        this.dirty = this.lazy // 缓存值
+        this.vm = vm
+        this.lazy ? undefined : this.get()
     }
     addDep(dep) { // 一个组件对应多个属性 重复的属性也不用记录
         let id = dep.id
@@ -23,16 +27,35 @@ class Watcher {
             dep.addSub(this) // watcher已经记住dep切已经去重 此刻让dep也记住watcher
         }
     }
+    evaluate(){
+        // 获取到用户函数的返回值 并且还要表示为脏
+        this.value = this.get()
+        this.dirty = false
+    }
     get() {
-        Dep.target = this // 静态属性只有一份
-        this.getter() // 会上vm上取值 模板里面的变量
-        Dep.target = null // 渲染完后，变量就不需要在页面使用了，因此可以释放依赖
+        pushTarget(this) // 静态属性只有一份
+        let value = this.getter.call(this.vm) // 会上vm上取值 模板里面的变量
+        popTarget() // 渲染完后，变量就不需要在页面使用了，因此可以释放依赖
+        return value
+    }
+    depend(){
+        let i = this.deps.length
+        while(i--){
+            // 让计算属性watcher也收集渲染watcher
+            this.deps[i].depend()
+        }
     }
     update() {
-        // 把当前的watcher暂存起来
-        queueWatcher(this)
-        // 重新渲染
-        // this.get()
+        if (this.lazy) {
+            // 如果是计算属性 依赖的值发生拜年话了 就标识计算属性是脏值了
+            this.dirty = true
+        }else{
+            // 把当前的watcher暂存起来
+            queueWatcher(this)
+            // 重新渲染
+            // this.get()
+        }
+        
     }
     run() {
         this.get()
@@ -90,11 +113,11 @@ if (Promise) {
     timerFunc = () => {
         textNode.textContent = 2
     }
-}else if (setImmediate) {
+} else if (setImmediate) {
     timerFunc = () => {
         setImmediate(flushCallbacks)
     }
-}else{
+} else {
     timerFunc = () => {
         setTimeout(flushCallbacks)
     }

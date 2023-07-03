@@ -78,6 +78,7 @@ export function mountComponent(vm, el){
     const updateComponent = () => {
         vm._update(vm._render())  //vm.$options.render()
     }
+    // true用来标识是一个渲染watcher
     new Watcher(vm, updateComponent, true)
     // 2、根据虚拟dom产生真实dom
     // 3、插入到el元素中

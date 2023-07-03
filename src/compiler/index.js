@@ -53,9 +53,7 @@ function genChildren(children = []) {
 }
 function codelgen(ast) {
     let children = genChildren(ast.children)
-    let code = (`_c('${ast.tag}',${ast.attrs.length > 0 ? genProps(ast.attrs) : 'null'
-        }${ast.children.length ? `,${children}` : ''
-        })`)
+    let code = (`_c('${ast.tag}',${ast.attrs.length > 0 ? genProps(ast.attrs) : 'null'}${ast.children.length ? `,${children}` : ''})`)
     return code
 }
 // 对模板进行编译处理

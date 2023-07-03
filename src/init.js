@@ -11,7 +11,7 @@ export function initMixin(Vue) {
         const vm = this
         // 将用户的选项挂载到实例上
         this.$options = options
-        // 初始化状态
+        // 初始化状态 初始化计算属性和watcher
         initState(vm)
         if (options.el) {
             vm.$mount(options.el)
@@ -37,7 +37,6 @@ export function initMixin(Vue) {
             if (template) {
                 // 这里需要对模板进行编译
                 const render = compileToFunction(template);
-                console.log(render, "----------render----------");
                 // jsx 最终会被编译成h('xxx')
                 ops.render = render
             }
