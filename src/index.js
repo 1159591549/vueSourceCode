@@ -1,22 +1,12 @@
 import { initMixin } from './init'
 import { initLifeCylce } from './lifecycle'
-import Watcher, { nextTick } from './observe/watcher'
+import { initStateMixin } from './state'
 function Vue(options) {
     this._init(options)
 }
-Vue.prototype.$nextTick = nextTick
-initMixin(Vue)
-initLifeCylce(Vue)
-/**
- * 
- * @param {*} exprOrFn 监控的变量可能是字符串 可能是函数
- * @param {*} cb 执行的回调
- * @param {*} options 参数
- */
-Vue.prototype.$watch = function (exprOrFn, cb) {
-    // firstname
-    // () => vm.firstname
-    // firstname值变化了直接执行cb函数即可
-    new Watcher(this, exprOrFn, { user: true }, cb)
-}
+initMixin(Vue) // 扩展了init方法
+initLifeCylce(Vue) // vm._update vm._render
+initStateMixin(Vue) // 实现了nextTick和$watch
+// --------------------为了方便观察前后的虚拟节点 测试使用
+let render1 = `<div>{{name}}</div>`
 export default Vue

@@ -1,6 +1,6 @@
 import { observe } from './observe/index'
 import Dep from './observe/dep'
-import Watcher from './observe/watcher'
+import Watcher, { nextTick } from './observe/watcher'
 export function initState(vm) {
     // 或得所有选项
     const opts = vm.$options
@@ -15,7 +15,7 @@ export function initState(vm) {
     }
 }
 // 初始化watch
-function initWatch(vm){
+function initWatch(vm) {
     let watch = vm.$options.watch
     // 字符串 数组 函数 对象的形式  对象的形式暂未包含
     for (const key in watch) {
@@ -24,18 +24,18 @@ function initWatch(vm){
             for (let i = 0; i < handler.length; i++) {
                 createWatcher(vm, key, handler[i])
             }
-        }else{
+        } else {
             createWatcher(vm, key, handler)
         }
-        
+
     }
 }
-function createWatcher(vm, key, handler){
+function createWatcher(vm, key, handler) {
     // 字符串 数组 函数 对象的形式 对象的形式暂未包含
     if (typeof handler === 'string') {
         handler = vm[handler]
     }
-    return vm.$watch(key, handler )
+    return vm.$watch(key, handler)
 }
 // 使用闭包，内部函数使用外部函数的参数
 function proxy(vm, target, key) {
@@ -86,10 +86,10 @@ function defineComputed(target, key, userDef) {
     })
 }
 // 计算属性根本不会收集依赖 只会让自己的依赖属性去收集依赖
-function createComputedGetter(key){
+function createComputedGetter(key) {
     // 我们需要监测是否要执行这个getter
-    return function(){
-        const watcher =  this._computedWatchers[key]
+    return function () {
+        const watcher = this._computedWatchers[key]
         if (watcher.dirty) {
             // 如果是脏的就去执行用户执行的函数
             // 求值后dirty变成了false，下次就不求值了
@@ -101,5 +101,20 @@ function createComputedGetter(key){
         }
         // 最后返回的是watcher上面的value
         return watcher.value
+    }
+}
+export function initStateMixin(Vue) {
+    Vue.prototype.$nextTick = nextTick
+    /**
+     * 
+     * @param {*} exprOrFn 监控的变量可能是字符串 可能是函数
+     * @param {*} cb 执行的回调
+     * @param {*} options 参数
+     */
+    Vue.prototype.$watch = function (exprOrFn, cb) {
+        // firstname
+        // () => vm.firstname
+        // firstname值变化了直接执行cb函数即可
+        new Watcher(this, exprOrFn, { user: true }, cb)
     }
 }
