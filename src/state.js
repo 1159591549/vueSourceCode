@@ -10,6 +10,32 @@ export function initState(vm) {
     if (opts.computed) {
         initComputed(vm)
     }
+    if (opts.watch) {
+        initWatch(vm)
+    }
+}
+// 初始化watch
+function initWatch(vm){
+    let watch = vm.$options.watch
+    // 字符串 数组 函数 对象的形式  对象的形式暂未包含
+    for (const key in watch) {
+        const handler = watch[key]
+        if (Array.isArray(handler)) {
+            for (let i = 0; i < handler.length; i++) {
+                createWatcher(vm, key, handler[i])
+            }
+        }else{
+            createWatcher(vm, key, handler)
+        }
+        
+    }
+}
+function createWatcher(vm, key, handler){
+    // 字符串 数组 函数 对象的形式 对象的形式暂未包含
+    if (typeof handler === 'string') {
+        handler = vm[handler]
+    }
+    return vm.$watch(key, handler )
 }
 // 使用闭包，内部函数使用外部函数的参数
 function proxy(vm, target, key) {
