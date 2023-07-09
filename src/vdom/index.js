@@ -26,3 +26,7 @@ function vnode(vm, tag, key, data, children, text) {
         text
     }
 }
+// 判断两个节点
+export function isSameVnode(vndoe1, vnode2){
+    return vndoe1.tag ===vnode2.tag && vndoe1.key === vnode2.key
+}

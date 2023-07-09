@@ -1,6 +1,7 @@
 import { initMixin } from './init'
 import { initLifeCylce } from './lifecycle'
 import { initStateMixin } from './state'
+import { patch } from './vdom/patch'
 function Vue(options) {
     this._init(options)
 }
