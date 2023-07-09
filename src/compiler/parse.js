@@ -59,7 +59,9 @@ export function parseHTML(html) {
     function advance(n) {
         html = html.substring(n)
     }
+    // 匹配标签的开始和标签的属性<div style='color: green;'>
     function parseStartTag() {
+        // 注：startTagopen匹配的是开始标签。start匹配返回结果：start[0]匹配到标签的开始 <div; start[1]匹配标签名 div
         const start = html.match(startTagopen)
         if (start) {
             const match = {
@@ -68,6 +70,14 @@ export function parseHTML(html) {
             }
             advance(start[0].length)
             let attr, end;
+            // 注：attribute匹配的是属性
+            // attr[0]匹配完整属性如 style="color: green;" 
+            // attr[1]匹配的属性名style attr[2]匹配的= 
+            // attr[3]匹配的属性值color:green
+            // attr[3] attr[4] attr[5]匹配的属性值
+            // startTagClose匹配的是开始标签的结束
+            // end[0]匹配的是 >
+            // end[1]匹配的是 ''
             // 如果不是开始标签的结束 就一直匹配下去
             while (!(end = html.match(startTagClose)) && (attr = html.match(attribute))) {
                 advance(attr[0].length)

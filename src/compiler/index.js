@@ -33,6 +33,10 @@ function gen(node) {
             // 正则表达式每次匹配都要重新0开始
             defaultTagRE.lastIndex = 0
             let lastIndex = 0
+            // 注：match匹配的是差值表达式 
+            // match[0] 是匹配结果{{name}}
+            // match[1] 是匹配结果name
+            // match.index 是匹配到的插值表达的索引开始
             while (match = defaultTagRE.exec(text)) {
                 let index = match.index // 匹配的开始位置
                 if (index > lastIndex) {
@@ -59,12 +63,14 @@ function codelgen(ast) {
 // 对模板进行编译处理
 export function compileToFunction(template) {
     // 1、就是将template转换成ast语法树
+    // 注：ast语法树就是包含{tag: '', type: '', children:[], attrs:[], parent}结构的数据
     let ast = parseHTML(template)
     // 2、生成render方法(render方法执行后的返回结果就是虚拟dom)
     // 模板引擎的实现原理 就是 with + new Function()
     let code = codelgen(ast)
     code = `with(this){return ${code}}`
     // 根据代码生成render函数
+    // 注：render函数就是包含_c('div', {style: {color: red, background: yellow}, id: 'app'}, children:[])的函数，render函数的返回值就是虚拟dom
     let render = new Function(code)
     return render
     // ast属性组装成 标签名 属性 儿子
